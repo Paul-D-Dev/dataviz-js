@@ -1,22 +1,27 @@
 body {
     margin: 0;
     width: 100%;
+
 }
 
 .dataviz {
     display: flex;
     flex-wrap: wrap;
-    /* justify-content: center; */
+    justify-content: center;
+    width: 960px;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 svg {
     margin: 10px;
     width: 100%;
-	height: 100%;
 }
-.pie-title {
-    /* transform: translate(0, 10px); */
+.pie__title {
+    transform: translate(-135px, -255px);
     font-size: 20px;
+    font-weight: bold;
 }
 .pie__slice-form {
     stroke-width: 2px;

@@ -114,7 +114,7 @@ function prepareData(data) {
 function createCamembert(datum) {
     const title = datum.question;
     const values = datum.answers
-    const svgWidth = 500, svgHeight = 300, radius =  Math.min(svgWidth, svgHeight) / 2 ;
+    const svgWidth = 960, svgHeight = 450, radius =  Math.min(svgWidth, svgHeight) / 2 ;
 
     // Set color
     const color = d3.scaleOrdinal(['#4daf4a','#377eb8','#ff7f00','#984ea3','#e41a1c']);
@@ -126,17 +126,12 @@ function createCamembert(datum) {
 
     // Define arc
     const arc = d3.arc()
-        .outerRadius(radius)
-        .innerRadius(0);
+        .outerRadius(radius * 0.8)
+        .innerRadius(radius * 0.4);
 
     const outerArc = d3.arc()
         .outerRadius(radius*0.9)
         .innerRadius(radius*0.9)
-
-    // Define label
-    const label = d3.arc()
-        .outerRadius(radius)
-        .innerRadius(0);
 
 
     const svg = d3.select('main')
@@ -152,7 +147,7 @@ function createCamembert(datum) {
         .attr("class", "pie__label");
     svg.append("g")
         .attr("class", "pie__line");
-    svg.append("g")
+    svg.append("text")
         .attr("class", "pie__title")
         .attr("x", 50)
         .attr("y", 50)
@@ -184,13 +179,7 @@ function createCamembert(datum) {
         pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
         return "translate(" + pos + ")";
     } 
-
-    function lines(d) {
-        const post = outerArc.centroid(d);
-        pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
-        return [arc.centroid(d2), outerArc.centroid(d2), pos];
-    }
-    
+  
 
     const text = svg.select('.pie__label').selectAll('text')
         .data(pie(values));
@@ -205,11 +194,21 @@ function createCamembert(datum) {
         .remove();
 
     /* --------- SLICE TO TEXT POLYLINES --------*/    
-    // const polyline = svg.select('.pie__line').selectAll()
-    //     .data(pie(values));
+
+    function lines(d) {
+        const pos = outerArc.centroid(d);
+        pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+        return [arc.centroid(d), outerArc.centroid(d), pos];
+    }
+
+    const polyline = svg.select('.pie__line').selectAll()
+        .data(pie(values));
     
-    // polyline.enter()
-    //     .append("polyline")
+    polyline.enter()
+        .append("polyline")
+        .attr('points', (d) => lines(d));
+    polyline.exit()
+        .remove();
         
     
 
