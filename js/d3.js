@@ -116,23 +116,7 @@ function createCamembert(datum) {
     const values = datum.answers
     const svgWidth = 500, svgHeight = 300, radius =  Math.min(svgWidth, svgHeight) / 2 ;
 
-    const svg = d3.select('main')
-        .append('svg')
-        .attr("width", svgWidth).attr("height", svgHeight);
-
-    // Add Title of the Cam
-    svg.append("text")
-        .attr("class", "pie-title")
-        .attr("x", 50)
-        .attr("y", 50)
-        .text(title);
-
-
-    //Create group element to hold pie chart    
-    const g = svg.append("g")
-        .attr("transform", "translate(" + svgWidth / 2 + "," + svgHeight / 2 + ")");
-
-
+    // Set color
     const color = d3.scaleOrdinal(['#4daf4a','#377eb8','#ff7f00','#984ea3','#e41a1c']);
 
     // Method pie to set value;
@@ -140,36 +124,97 @@ function createCamembert(datum) {
         return d.value; 
     });
 
-    const path = d3.arc()
+    // Define arc
+    const arc = d3.arc()
         .outerRadius(radius)
         .innerRadius(0);
-    
-    // Create x arcs = nb i of []values
-    const arc = g.selectAll("arc")
-        .data(pie(values))
-        .enter()
-        .append("g")
-        .attr('class', 'pie__slice')
 
-    arc.append("path")
-        .attr("d", path)
-        .attr("fill", (d) => color(d.index))
-        .attr('class', 'pie__slice-form')
+    const outerArc = d3.arc()
+        .outerRadius(radius*0.9)
+        .innerRadius(radius*0.9)
 
+    // Define label
     const label = d3.arc()
         .outerRadius(radius)
         .innerRadius(0);
 
+
+    const svg = d3.select('main')
+        .append('svg')
+        .attr("width", svgWidth).attr("height", svgHeight)
+        .append('g')
+        .attr('class', 'pie')
+        .attr("transform", "translate(" + svgWidth / 2 + "," + svgHeight / 2 + ")");
+
+    svg.append('g')
+        .attr("class", "pie__slice");
+    svg.append("g")
+        .attr("class", "pie__label");
+    svg.append("g")
+        .attr("class", "pie__line");
+    svg.append("g")
+        .attr("class", "pie__title")
+        .attr("x", 50)
+        .attr("y", 50)
+        .text(title);
+
+
+    /* --------- SLICE --------- */
+    const slice = svg.select('.pie__slice').selectAll('path.slice')
+        .data(pie(values))
+
+    slice.enter()
+        .insert('path')
+        .attr('class', 'pie__slice-form')
+        .style('fill', d => color(d.index))
+        .attr("d", arc)
+
+	slice.exit()
+		.remove();
+
+
     /* --------- TEXT LABELS --------*/
 
-    arc.append("text")
-        .attr("transform", (d) => "translate(" + label.centroid(d) + ")")
-        .attr('class', 'pie__slice-legend')
-        .text(function(d) { return `${d.data.label} (${d.value} - ${d.data.percent}%)`})
+    function midAngle(d) {
+        return d.startAngle + (d.endAngle - d.startAngle)/2;
+    };
+
+    function outLabel(d) {
+        const pos = outerArc.centroid(d);
+        pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
+        return "translate(" + pos + ")";
+    } 
+
+    function lines(d) {
+        const post = outerArc.centroid(d);
+        pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+        return [arc.centroid(d2), outerArc.centroid(d2), pos];
+    }
+    
+
+    const text = svg.select('.pie__label').selectAll('text')
+        .data(pie(values));
+
+    text.enter()
+        .append('text')
+        .attr('dy', '.35em')
+        .text((d) => `${d.data.label} (${d.value} : ${d.data.percent}%)`)
+        .attr('transform', (d) => outLabel(d))
+        .style('text-anchor', (d) => midAngle(d) < Math.PI ? 'start' : 'end');
+    text.exit()
+        .remove();
+
+    /* --------- SLICE TO TEXT POLYLINES --------*/    
+    // const polyline = svg.select('.pie__line').selectAll()
+    //     .data(pie(values));
+    
+    // polyline.enter()
+    //     .append("polyline")
+        
+    
 
 
 }
-
 
 async function renderPie() {
     const fecthDatas = await getJsonFromResult();

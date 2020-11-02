@@ -11,6 +11,8 @@ body {
 
 svg {
     margin: 10px;
+    width: 100%;
+	height: 100%;
 }
 .pie-title {
     /* transform: translate(0, 10px); */
@@ -24,5 +26,11 @@ svg {
 
 .pie__slice-legend {
     text-anchor: middle;
+}
 
+polyline{
+	opacity: .3;
+	stroke: black;
+	stroke-width: 2px;
+	fill: none;
 }
