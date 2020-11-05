@@ -12,99 +12,6 @@ async function fetchGet(url) {
     }
 }
  
-// const getData = fecthData('datas')
-function pushValue(value, arrayProperty) {
-    if (Array.isArray(value)) {
-        value.map((item) => {
-            arrayProperty.push(item);
-        })
-    } else {
-        arrayProperty.push(value);
-    }
-}
-
-async function getJsonFromResult() {
-    let results = await fetchGet('results?surveyId=1');
-
-    // regroup all Json results in jsons[]
-    let jsons = [];
-    for (const result of results) {
-        jsons.push(result.json);
-    }
-
-    return jsons;
-}
-
-function setQuestionWithAnswers(JSONArray) {
-    // Regroup each JsonResult by questions with thier answer into an object answers
-    let answers = {};
-
-    // This loop regroups the question and their answers in answersObject
-    for (const json of JSONArray) {
-
-        for (const question in json) {
-            // answer = value of the property (question : "value");
-            const answer = json[question];
-
-            /*  Verify if the Object answers got the property then we create the property = an array
-                then we use pushValue method's
-                if not we directy => use the method pushValue;
-            */
-            if (!answers.hasOwnProperty(question)) {
-                answers[question] = [];
-                pushValue(answer, answers[question]);
-            } else {
-                pushValue(answer, answers[question]);
-            }
-        }
-    }
-
-    return answers;
-}
-
-// Count the results of answers
-// And transform to array of object name, value
-function find_duplicate_in_array(array){
-    const total = array.length;
-    const count = {}
-    const result = []
-    
-    array.forEach(item => {
-        if (count[item]) {
-            count[item] +=1
-            return
-        }
-        count[item] = 1
-    })
-    
-    for (let prop in count){
-        if (count[prop]){
-
-            result.push({
-                label : prop,
-                value : count[prop],
-                percent : (count[prop]/total*100).toFixed(0)
-            })
-        }
-    }
-    return result;
-    
-}
-
-
-// Prepare the data to build camembert
-// [ { question: 'Q1, answer : [ name : 'n1', value: 1]}]
-function prepareData(data) {
-    const datas = [];
-
-    Object.entries(data).map((items) => {
-        datas.push({question: items[0], answers: find_duplicate_in_array(items[1])})
-    })
-
-    return datas
-}
-
-
 
 
 /**
@@ -121,7 +28,7 @@ function createCamembert(datum) {
 
     // Method pie to set value;
     const pie = d3.pie().value(function(d) { 
-        return d.value; 
+        return d.count; 
     });
 
     // Define arc
@@ -216,11 +123,7 @@ function createCamembert(datum) {
 }
 
 async function renderPie() {
-    const fecthDatas = await getJsonFromResult();
-    const answers = setQuestionWithAnswers(fecthDatas);
-    console.log(answers);
-    const data = prepareData(answers);
-    console.log(data);
+    const data = await fetchGet('responses/surveys/1');
     
     for (let i = 0; i < data.length; i++) {
         const datum = data[i];
